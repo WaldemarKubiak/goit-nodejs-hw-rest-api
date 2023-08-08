@@ -7,7 +7,7 @@ const contactsPath = path.join(__dirname, './contacts.json');
 const listContacts = async () => {
 	try {
 		const contacts = await fs.readFile(contactsPath, 'utf8');
-		const contactsList = await JSON.parse(contacts);
+		const contactsList = JSON.parse(contacts);
 		return contactsList;
 	} catch (err) {
 		console.log(`Error Description>>> ${err.message}`);
@@ -18,9 +18,7 @@ const listContacts = async () => {
 const getContactById = async contactId => {
 	try {
 		const contacts = await listContacts();
-		const contactById = await contacts.find(
-			contact => contact.id === contactId.toString()
-		);
+		const contactById = contacts.find(contact => contact.id === contactId);
 		return contactById;
 	} catch (err) {
 		console.log(`Error Description>>> ${err.message}`);
@@ -31,9 +29,7 @@ const getContactById = async contactId => {
 const removeContact = async contactId => {
 	try {
 		const contacts = await listContacts();
-		const contactToRemove = await contacts.find(
-			contact => contact.id === contactId.toString()
-		);
+		const contactToRemove = contacts.find(contact => contact.id === contactId);
 		if (!contactToRemove) {
 			return null;
 		}
@@ -74,8 +70,8 @@ const addContact = async body => {
 const updateContact = async (contactId, body) => {
 	try {
 		const contacts = await listContacts();
-		const updatedContacts = await contacts.map(contact =>
-			contact.id === contactId.toString() ? { ...contact, ...body } : contact
+		const updatedContacts = contacts.map(contact =>
+			contact.id === contactId ? { ...contact, ...body } : contact
 		);
 
 		await fs.writeFile(
