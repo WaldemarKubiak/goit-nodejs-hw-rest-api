@@ -12,8 +12,13 @@ const getLogoutUser = async id => {
 	return User.findByIdAndUpdate({ _id: id }, { token: null }, { new: true });
 };
 
+const getUserById = async id => {
+	return User.findOne({ _id: id });
+};
+
 module.exports = {
 	getUserByEmail,
 	loginUser,
 	getLogoutUser,
+	getUserById,
 };

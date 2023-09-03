@@ -113,8 +113,27 @@ const logoutUser = async (req, res, _) => {
 	}
 };
 
+const currentUser = async (req, res, _) => {
+	try {
+		const { id } = req.user;
+		const response = await service.getUserById(id);
+		res.status(200).json({
+			status: 'success',
+			code: 200,
+			data: 'OK',
+			ResponseBody: {
+				email: response.email,
+				subscription: response.subscription,
+			},
+		});
+	} catch (err) {
+		console.error(err);
+	}
+};
+
 module.exports = {
 	registerUser,
 	loginUser,
 	logoutUser,
+	currentUser,
 };
