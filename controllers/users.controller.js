@@ -1,5 +1,5 @@
-require('dotenv').config();
 const User = require('../models/user.schema');
+require('dotenv').config();
 const service = require('../services/users.service');
 const { userValidator } = require('../utils/joi/joi');
 const jwt = require('jsonwebtoken');
