@@ -18,7 +18,7 @@ const validateSchemaFavorite = Joi.object({
 	favorite: Joi.boolean(),
 });
 
-const validateUserRegistration = Joi.object({
+const userValidator = Joi.object({
 	email: Joi.string().email({ tlds: true }).required(),
 	password: Joi.string()
 		.trim()
@@ -30,5 +30,5 @@ module.exports = {
 	validateSchemaPost,
 	validateSchemaPut,
 	validateSchemaFavorite,
-	validateUserRegistration,
+	userValidator,
 };
