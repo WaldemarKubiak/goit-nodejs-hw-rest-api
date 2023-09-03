@@ -18,8 +18,17 @@ const validateSchemaFavorite = Joi.object({
 	favorite: Joi.boolean(),
 });
 
+const validateUserRegistration = Joi.object({
+	email: Joi.string().email({ tlds: true }).required(),
+	password: Joi.string()
+		.trim()
+		.pattern(/^[a-zA-Z0-9]{3,30}$/)
+		.required(),
+});
+
 module.exports = {
 	validateSchemaPost,
 	validateSchemaPut,
 	validateSchemaFavorite,
+	validateUserRegistration,
 };
