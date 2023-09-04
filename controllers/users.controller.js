@@ -1,7 +1,7 @@
 const User = require('../models/user.schema');
 require('dotenv').config();
 const service = require('../services/users.service');
-const { userValidator } = require('../utils/joi/joi');
+const { userValidator, userValidateSubscription } = require('../utils/joi/joi');
 const jwt = require('jsonwebtoken');
 
 const secret = process.env.JWT_SECRET;
@@ -131,9 +131,54 @@ const currentUser = async (req, res, _) => {
 	}
 };
 
+const updateSubscription = async (req, res, next) => {
+	try {
+		const { error } = userValidateSubscription.validate(req.body);
+		if (error)
+			return res.status(400).json({
+				status: 'error',
+				code: 400,
+				message: error.details[0].message,
+			});
+		const { userId } = req.params;
+		const { subscription } = req.body;
+		const updatedSubscription = await service.updateUserSubscription(
+			userId,
+			subscription
+		);
+		if (subscription === undefined || null) {
+			res.status(400).json({
+				status: 'error',
+				code: 400,
+				message: 'Missing field subscription',
+			});
+		}
+		if (updatedSubscription) {
+			res.status(200).json({
+				status: 'success',
+				code: 200,
+				data: 'OK',
+				ResponseBody: {
+					updatedSubscription,
+				},
+			});
+		} else {
+			res.status(404).json({
+				status: 'fail',
+				code: 404,
+				message: 'Not found',
+			});
+		}
+	} catch (err) {
+		console.error(err);
+		next(err);
+	}
+};
+
 module.exports = {
 	registerUser,
 	loginUser,
 	logoutUser,
 	currentUser,
+	updateSubscription,
 };

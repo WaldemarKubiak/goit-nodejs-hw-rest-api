@@ -16,9 +16,14 @@ const getUserById = async id => {
 	return User.findOne({ _id: id });
 };
 
+const updateUserSubscription = async (userId, subscription) => {
+	return User.findByIdAndUpdate(userId, { subscription }, { new: true });
+};
+
 module.exports = {
 	getUserByEmail,
 	loginUser,
 	getLogoutUser,
 	getUserById,
+	updateUserSubscription,
 };

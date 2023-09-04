@@ -26,9 +26,14 @@ const userValidator = Joi.object({
 		.required(),
 });
 
+const userValidateSubscription = Joi.object({
+	subscription: Joi.string().valid('starter', 'pro', 'business'),
+});
+
 module.exports = {
 	validateSchemaPost,
 	validateSchemaPut,
 	validateSchemaFavorite,
 	userValidator,
+	userValidateSubscription,
 };
