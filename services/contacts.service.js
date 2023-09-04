@@ -4,6 +4,12 @@ const getAll = async () => {
 	return Contact.find();
 };
 
+const getPagination = async (page, limit) => {
+	return Contact.find().skip((page - 1) * limit)
+		.limit(limit)
+		.exec();
+};
+
 const getById = async contactId => {
 	return Contact.findById(contactId);
 };
@@ -24,6 +30,8 @@ const removeContact = async contactId => {
 	return Contact.findByIdAndDelete(contactId);
 };
 
+
+
 module.exports = {
 	getAll,
 	getById,
@@ -31,4 +39,5 @@ module.exports = {
 	updateContact,
 	updateFavorite,
 	removeContact,
+	getPagination,	
 };
