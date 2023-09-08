@@ -3,6 +3,7 @@ require('dotenv').config();
 const service = require('../services/users.service');
 const { userValidator, userValidateSubscription } = require('../utils/joi/joi');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
 
 const secret = process.env.JWT_SECRET;
 
@@ -32,13 +33,20 @@ const registerUser = async (req, res, next) => {
 		});
 	}
 	try {
-		const newUser = new User({ email, password });
+		const avatarURL = gravatar.url(email, {
+			s: '200',
+			r: 'pg',
+			d: '404',
+		});
+
+		const newUser = new User({ email, password, avatarURL });
 		newUser.setPassword(password);
 		await newUser.save();
 		const response = {
 			user: {
 				email: newUser.email,
 				subscription: newUser.subscription,
+				avatarURL: newUser.avatarURL,
 			},
 		};
 		res.status(201).json({
