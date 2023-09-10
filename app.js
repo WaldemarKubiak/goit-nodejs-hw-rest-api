@@ -29,4 +29,9 @@ app.use((err, req, res, next) => {
 	res.status(500).json({ message: err.message });
 });
 
+app.use((err, req, res, next) => {
+	res.status(err.status || 500);
+	res.json({ message: err.message, status: err.status });
+});
+
 module.exports = app;
