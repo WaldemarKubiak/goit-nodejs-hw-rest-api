@@ -1,7 +1,9 @@
 const User = require('../models/user.schema');
 require('dotenv').config();
+const { nanoid } = require('nanoid');
 const service = require('../services/users.service');
 const { userValidator, userValidateSubscription } = require('../utils/joi/joi');
+const sgMail = require('../services/email.service');
 const jwt = require('jsonwebtoken');
 const gravatar = require('gravatar');
 const fs = require('fs').promises;
@@ -41,9 +43,13 @@ const registerUser = async (req, res, next) => {
 			r: 'pg',
 		});
 
-		const newUser = new User({ email, password, avatarURL });
+		const verificationToken = nanoid();
+		const newUser = new User({ email, password, avatarURL, verificationToken });
 		newUser.setPassword(password);
 		await newUser.save();
+		if (verificationToken) {
+			sgMail.sendVerificationToken(email, verificationToken);
+		}
 		const response = {
 			user: {
 				email: newUser.email,
@@ -56,6 +62,7 @@ const registerUser = async (req, res, next) => {
 			code: 201,
 			data: 'Created',
 			ResponseBody: response,
+			message: `Hello ${email}. Please check your email box`,
 		});
 	} catch (err) {
 		console.error(err);
@@ -77,7 +84,7 @@ const loginUser = async (req, res, next) => {
 	}
 	try {
 		const user = await service.getUserByEmail(email);
-		if (!user || !user.validPassword(password)) {
+		if (!user || !user.validPassword(password) || !user.verify) {
 			return res.status(401).json({
 				status: 'fail',
 				code: 401,
@@ -222,6 +229,39 @@ const updateAvatar = async (req, res, next) => {
 	}
 };
 
+const verifyUserByToken = async (req, res, next) => {
+	try {
+		const { verificationToken } = req.params;
+		const response = await service.getUserByverificationToken(
+			verificationToken
+		);
+
+		if (response) {
+			await service.updateUserVerification(response.id);
+			res.status(200).json({
+				status: 'success',
+				code: 200,
+				data: 'OK',
+				ResponseBody: {
+					message: 'Verification successful',
+				},
+			});
+		} else {
+			return res.status(404).json({
+				status: 'fail',
+				code: 404,
+				data: 'Not found',
+				ResponseBody: {
+					message: 'User not found',
+				},
+			});
+		}
+	} catch (err) {
+		console.error(err);
+		next(err);
+	}
+};
+
 module.exports = {
 	registerUser,
 	loginUser,
@@ -229,4 +269,5 @@ module.exports = {
 	currentUser,
 	updateSubscription,
 	updateAvatar,
+	verifyUserByToken,
 };
