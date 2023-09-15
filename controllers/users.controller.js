@@ -2,7 +2,11 @@ const User = require('../models/user.schema');
 require('dotenv').config();
 const { nanoid } = require('nanoid');
 const service = require('../services/users.service');
-const { userValidator, userValidateSubscription } = require('../utils/joi/joi');
+const {
+	userValidator,
+	userValidateSubscription,
+	emailResendValidator,
+} = require('../utils/joi/joi');
 const sgMail = require('../services/email.service');
 const jwt = require('jsonwebtoken');
 const gravatar = require('gravatar');
@@ -62,7 +66,7 @@ const registerUser = async (req, res, next) => {
 			code: 201,
 			data: 'Created',
 			ResponseBody: response,
-			message: `Hello ${email}. Please check your email box`,
+			message: `Hello ${email}. Please check your email inbox`,
 		});
 	} catch (err) {
 		console.error(err);
@@ -262,6 +266,56 @@ const verifyUserByToken = async (req, res, next) => {
 	}
 };
 
+const resendVerificationMail = async (req, res, next) => {
+	const { email } = req.body;
+	const { error } = emailResendValidator.validate(req.body);
+	if (error) {
+		return res.status(400).json({
+			status: 'error',
+			code: 400,
+			data: 'Bad Request',
+			ResponseBody: {
+				message: 'missing reguired field email',
+				error: error.details[0].message,
+			},
+		});
+	}
+	try {
+		const user = await service.getUserFromBody({ email });
+
+		if (!user) {
+			return res.status(400).json({
+				status: 'error',
+				code: 400,
+				message: 'Incorrect email ',
+			});
+		}
+		if (user.verify) {
+			return res.status(400).json({
+				status: 'error',
+				code: 400,
+				data: 'Bad Request',
+				ResponseBody: {
+					message: 'Verification has already been passed',
+				},
+			});
+		}
+		const newVerifyToken = user.verificationToken;
+		await sgMail.sendVerificationToken(email, newVerifyToken);
+		res.status(200).json({
+			status: 'success',
+			code: 200,
+			data: 'OK',
+			ResponseBody: {
+				message: 'Verification email sent',
+			},
+		});
+	} catch (err) {
+		console.error(err);
+		next(err);
+	}
+};
+
 module.exports = {
 	registerUser,
 	loginUser,
@@ -270,4 +324,5 @@ module.exports = {
 	updateSubscription,
 	updateAvatar,
 	verifyUserByToken,
+	resendVerificationMail,
 };

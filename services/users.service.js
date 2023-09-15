@@ -35,6 +35,10 @@ const updateUserVerification = async id => {
 	);
 };
 
+const getUserFromBody = async body => {
+	return User.findOne(body);
+};
+
 module.exports = {
 	getUserByEmail,
 	loginUser,
@@ -44,4 +48,5 @@ module.exports = {
 	updateUserAvatar,
 	getUserByverificationToken,
 	updateUserVerification,
+	getUserFromBody,
 };
